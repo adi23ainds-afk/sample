@@ -151,88 +151,8 @@ ansible-playbook -i hosts.ini setup.yml
 
 (if password is asked, type “root” without double quotes or enter your sudo password)
 
-Program 8
 
-Pre-requisites: 
-a. Creating Maven project
-b. Installing Jenkins
-c. Setting Git
-d. Pushing Maven project to Github
-e. Running Maven project through Jenkins pipeline script
-
-Create deploy.yaml file with following contents :
-
->gedit deploy.yaml
-
----
-- name: Deploy Artifact to Localhost
-  hosts: localhost
-  become: true
-  become_user: student
-  become_method: su
-
-  tasks:
-    - name: Copy the artifact to the target location
-      copy:
-        src: "/var/lib/jenkins/workspace/maven/target/hello-maven-1.0-SNAPSHOT.jar"
-        dest: "/home/student/Desktop/t.jar"
-
-Create hosts.ini :
-
-> gedit hosts.ini
-
-[local]
-localhost ansible_connection=local
-
-Add the following script in pipeline script 
-
-pipeline {
-    agent any
-
-    stages {
-
-        stage('Checkout') {
-            steps {
-                git branch: 'main',
-                url: 'https://github.com/haas23ainds-dot/hello-maven.git'
-            }
-        }
-
-        stage('Build') {
-            steps {
-                sh 'mvn clean package'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                sh 'mvn test'
-            }
-        }
-
-        stage('Archive Artifacts') {
-            steps {
-                archiveArtifacts artifacts: '**/target/*.jar',
-                allowEmptyArchive: true
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                sh """
-                export ANSIBLE_HOST_KEY_CHECKING=False
-                ansible-playbook -i /var/lib/jenkins/workspace/maven2/hosts.ini \
-                /var/lib/jenkins/workspace/maven2/deploy.yaml \
-                --extra-vars='ansible_become_pass=login@123'
-                """
-            }
-        }
-    }
-}
-
-Build now
-See Console output
-Check t.jar file on Desktop
+     
 
 Program 9
 
